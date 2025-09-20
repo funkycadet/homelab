@@ -1,0 +1,83 @@
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: DEBUG
+  format: json
+
+# api would be disabled in prod
+api:
+  dashboard: true
+  insecure: true
+
+entryPoints:
+  web:
+    address: :80
+    # http:
+    #   redirections:
+    #     entryPoint:
+    #       to: websecure
+    #       scheme: https
+  websecure:
+    address: :443
+
+certificateResolvers:
+  letsencrypt:
+    acme:
+      email: admin@funkycadet.xyz
+      storage: /var/traefik/certs/letsencrypt-acme.json
+      caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+      httpChallenge:
+        entryPoint: web
+      # caServer: "https://acme-v02.api.letsencrypt.org/directory"
+
+providers:
+  docker:
+    endpoint: "unix:///var/run/docker.sock"
+    exposedByDefault: false
+
+  file:
+    directory: /etc/traefik
+    watch: true
+
+accessLog:
+  format: json
+  fields:
+    defaultMode: keep
+    names:
+      ClientUsername: drop
+      StartUTC: drop
+    headers:
+      defaultMode: keep
+      names:
+        User-Agent: redact
+        Authorization: drop
+        Referer: keep
+
+metrics:
+  prometheus:
+    buckets:
+      - 0.1
+      - 0.3
+      - 1.2
+      - 5.0
+    addEntryPointsLabels: true
+    addRoutersLabels: true
+    addServicesLabels: true
+
+tracing: {}
+# tracing:
+#   otlp:
+#     grpc:
+#       endpoint: tempo:4317
+#       insecure: true
+#   serviceName: traefik
+#   addInternals: true
+#   sampleRate: 0.2
+
+# tracing:
+#   serviceName: "traefik"
+#   zipkin:
+#     httpEndpoint: "http://tempo:9411/api/v2/spans" # Example endpoint
+
