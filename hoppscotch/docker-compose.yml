@@ -1,0 +1,21 @@
+services:
+  hoppscotch:
+    image: hoppscotch/hoppscotch
+    container_name: hoppscotch
+    env_file:
+      - .env
+    restart: unless-stopped
+    ports:
+      - 3000:3000
+      - 3100:3100
+      - 3170:3170
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh:ro
+    entrypoint: ["/entrypoint.sh"]
+    command: ["node", "/usr/src/app/aio_run.mjs"]
+    networks:
+      - funkycadet-network
+
+networks:
+  funkycadet-network:
+    external: true
